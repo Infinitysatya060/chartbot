@@ -2,9 +2,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from .ai import ask_ai
-from database.db import chat_collection
-
-from datetime import datetime
+from .models import Chat
 
 
 @api_view(['POST'])
@@ -18,17 +16,14 @@ def chatbot(request):
             'error': 'Message is required'
         }, status=400)
 
+    # GET AI RESPONSE
     reply = ask_ai(message)
 
-    # SAVE TO DATABASE
-
-    chat_collection.insert_one({
-
-        "message": message,
-        "reply": reply,
-        "created_at": datetime.utcnow()
-
-    })
+    # SAVE TO MYSQL DATABASE
+    Chat.objects.create(
+        message=message,
+        reply=reply
+    )
 
     return Response({
         'reply': reply
